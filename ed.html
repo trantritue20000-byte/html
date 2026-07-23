@@ -3,51 +3,207 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Editor - Code Live Sync</title>
+  <title>SaoTSB - Thách Đấu PvP</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { padding: 15px; font-family: monospace; background: #1e1e1e; color: #fff; }
-    h2 { margin-bottom: 10px; font-family: sans-serif; font-size: 18px; color: #4caf50; }
-    textarea {
-      width: 100%;
-      height: 65vh;
-      background: #252526;
-      color: #d4d4d4;
-      border: 1px solid #444;
-      border-radius: 8px;
-      padding: 10px;
-      font-size: 14px;
-      resize: vertical;
-      outline: none;
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --warning: #f59e0b;
     }
-    .btn-group { margin-top: 10px; display: flex; gap: 10px; }
-    button {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      font-size: 15px;
-      cursor: pointer;
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text); display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 15px; }
+
+    header { width: 100%; max-width: 800px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #334155; }
+    h1 { font-size: 1.5rem; color: var(--accent); }
+    
+    .btn-admin-icon { background: none; border: 1px solid #334155; color: var(--text-muted); border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-weight: bold; }
+    .btn-admin-icon:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Modal Overlay */
+    .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 100; padding: 15px; }
+    .modal { background: var(--card-bg); padding: 20px; border-radius: 12px; max-width: 450px; width: 100%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid #334155; max-height: 90vh; overflow-y: auto; }
+    .modal h2 { margin-bottom: 12px; color: var(--accent); font-size: 1.3rem; }
+    .modal p { margin-bottom: 15px; font-size: 0.9rem; line-height: 1.4; color: #cbd5e1; }
+
+    /* Roblox Profiles UI - chuẩn Mobile & PC */
+    .roblox-vs-container { display: flex; justify-content: space-around; align-items: center; margin: 15px 0; background: #0f172a; padding: 15px 10px; border-radius: 8px; border: 1px solid #334155; gap: 10px; }
+    .roblox-profile { display: flex; flex-direction: column; align-items: center; width: 45%; }
+    
+    .avatar-wrapper { width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--accent); overflow: hidden; background: #1e293b; display: flex; justify-content: center; align-items: center; margin-bottom: 6px; }
+    .roblox-avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .roblox-profile span { font-size: 0.85rem; font-weight: bold; color: var(--text); word-break: break-all; }
+    .vs-badge { font-weight: 900; color: var(--warning); font-size: 1.2rem; }
+
+    /* Inputs & Buttons */
+    input[type="text"], input[type="password"], input[type="number"] {
+      width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #fff; outline: none; font-size: 0.95rem;
     }
-    .btn-save { background: #007acc; color: white; }
-    .btn-save:active { background: #005999; }
-    #status { margin-top: 10px; font-size: 13px; color: #888; font-family: sans-serif; }
+    input:focus { border-color: var(--accent); }
+    
+    button { width: 100%; padding: 11px; border: none; border-radius: 6px; background: var(--accent); color: #000; font-weight: bold; cursor: pointer; transition: 0.2s; margin-bottom: 8px; font-size: 0.9rem; }
+    button:hover { background: var(--accent-hover); color: #fff; }
+    button.secondary { background: transparent; color: var(--text-muted); border: 1px solid #334155; }
+    button.secondary:hover { background: #334155; color: #fff; }
+    button.danger { background: var(--danger); color: #fff; }
+    button.warning { background: var(--warning); color: #000; }
+
+    /* Layout Main */
+    .container { width: 100%; max-width: 800px; }
+    .actions { display: flex; gap: 10px; margin-bottom: 15px; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #334155; }
+    .tab { padding: 8px 16px; cursor: pointer; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -2px; font-size: 0.9rem; }
+    .tab.active { color: var(--accent); border-color: var(--accent); font-weight: bold; }
+
+    /* Cards */
+    .card-list { display: flex; flex-direction: column; gap: 12px; }
+    .card { background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid #334155; display: flex; gap: 12px; align-items: center; }
+    .card-thumb-wrapper { width: 55px; height: 55px; border-radius: 50%; border: 1px solid var(--accent); overflow: hidden; flex-shrink: 0; background: #0f172a; display: flex; align-items: center; justify-content: center; }
+    .card-thumb { width: 100%; height: 100%; object-fit: cover; }
+    .card-content { flex-grow: 1; overflow: hidden; }
+    .card h3 { font-size: 1rem; margin-bottom: 4px; word-break: break-word; }
+    .card .score { font-size: 1.1rem; font-weight: bold; color: var(--accent); margin-top: 2px; }
+    .card-actions { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+    .card-actions button { width: auto; padding: 5px 10px; font-size: 0.8rem; margin: 0; }
+
+    .hidden { display: none !important; }
+    .status-msg { font-size: 0.85rem; margin-bottom: 10px; font-weight: bold; }
+    .status-msg.error { color: var(--danger); }
+    .status-msg.success { color: var(--success); }
   </style>
 </head>
 <body>
 
-  <h2>⚡ HTML Live Editor</h2>
-  <textarea id="code-input" placeholder="Nhập mã HTML/CSS/JS vào đây..."></textarea>
-  
-  <div class="btn-group">
-    <button class="btn-save" id="btn-save">🚀 LƯU & CẬP NHẬT APP</button>
+  <header>
+    <h1>TSB SAOTSB - PVP</h1>
+    <button class="btn-admin-icon" id="btnAdminModal" title="Quyền Admin">?</button>
+  </header>
+
+  <div class="container">
+    <div id="adminBanner" class="hidden" style="background: #334155; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+      <span style="font-size: 0.85rem;">🔑 Chế độ <b>Admin</b></span>
+      <button id="btnLogoutAdmin" class="danger" style="width: auto; padding: 4px 10px; margin: 0; font-size: 0.8rem;">Đăng xuất Admin</button>
+    </div>
+
+    <div class="actions">
+      <button id="btnOpenCreate">⚡ Tạo Lời Mời Thách Đấu</button>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="gui">Đang Gửi</div>
+      <div class="tab" data-tab="duyet">Đã Duyệt</div>
+      <div class="tab" data-tab="ketthuc">Đã Xong</div>
+    </div>
+
+    <div id="cardContainer" class="card-list"></div>
   </div>
-  <div id="status">Đang kết nối Firebase...</div>
+
+  <!-- Modal 1: TikTok -->
+  <div class="overlay" id="modalTikTok">
+    <div class="modal">
+      <h2>Chào mừng đến với TSB!</h2>
+      <p>Follow ngay kênh TikTok <b>SaoTSB</b> (ID: <b>saotsb14</b>) để được duyệt kèo PvP nhanh nhất nhé!</p>
+      <button onclick="window.open('https://www.tiktok.com/@saotsb14?_r=1&_t=ZS-98Gc5tPmo7h', '_blank')">Mở TikTok Follow</button>
+      <button class="secondary" id="btnCloseTikTok">Bỏ qua bước này</button>
+    </div>
+  </div>
+
+  <!-- Modal 2: Wizard Tạo Thách Đấu -->
+  <div class="overlay hidden" id="modalCreate">
+    <div class="modal">
+      <!-- Step 1 -->
+      <div id="step1">
+        <h2>Bước 1: Tên Roblox</h2>
+        <p>Nhập chính xác tên người dùng Roblox của bạn:</p>
+        <input type="text" id="robloxInput" placeholder="Ví dụ: RobloxUser123">
+        <div id="robloxStatus" class="status-msg"></div>
+        <button id="btnCheckRoblox">Kiểm Tra Tên Roblox</button>
+      </div>
+
+      <!-- Step 2 -->
+      <div id="step2" class="hidden">
+        <h2>Bước 2: Kết Bạn Roblox</h2>
+        <p>Vui lòng gửi kết bạn với tài khoản SaoTSB bên dưới:</p>
+        
+        <div class="roblox-vs-container">
+          <div class="roblox-profile">
+            <div class="avatar-wrapper">
+              <img id="fanAvatar" src="" class="roblox-avatar-img" alt="Fan" referrerpolicy="no-referrer">
+            </div>
+            <span id="fanName">...</span>
+          </div>
+          <div class="vs-badge">VS</div>
+          <div class="roblox-profile">
+            <div class="avatar-wrapper">
+              <img id="saotsbAvatar" src="" class="roblox-avatar-img" alt="SaoTSB" referrerpolicy="no-referrer">
+            </div>
+            <span style="color: var(--accent);">Hothiptvn</span>
+          </div>
+        </div>
+
+        <button id="btnStep2Next">Tôi Đã Kết Bạn ➔</button>
+        <button class="secondary" onclick="resetWizardStep()">Quay lại</button>
+      </div>
+
+      <!-- Step 3 -->
+      <div id="step3" class="hidden">
+        <h2>Bước 3: TikTok Của Bạn</h2>
+        <p>Nhập TikTok ID của bạn và chắc chắn đã follow SaoTSB để dễ liên hệ:</p>
+        <input type="text" id="tiktokInput" placeholder="ID TikTok của bạn">
+        <button id="btnSubmitChallenge">Gửi Lời Mời Thách Đấu</button>
+        <button class="secondary" onclick="backToStep2()">Quay lại</button>
+      </div>
+
+      <button class="secondary" id="btnCloseCreate" style="margin-top: 8px;">Hủy Bỏ</button>
+    </div>
+  </div>
+
+  <!-- Modal 3: Admin Pass -->
+  <div class="overlay hidden" id="modalAdminPass">
+    <div class="modal">
+      <h2>Mật Khẩu Admin</h2>
+      <input type="password" id="adminPassInput" placeholder="Nhập mật khẩu...">
+      <div id="adminPassStatus" class="status-msg error"></div>
+      <button id="btnLoginAdmin">Đăng Nhập</button>
+      <button class="secondary" id="btnCloseAdminPass">Hủy</button>
+    </div>
+  </div>
+
+  <!-- Modal 4: Sửa Tỷ Số -->
+  <div class="overlay hidden" id="modalEditScore">
+    <div class="modal">
+      <h2>Kết Thúc Trận Đấu</h2>
+      <p>Nhập tỷ số cho trận đấu của <b id="scoreFanName">...</b></p>
+      <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px; justify-content: center;">
+        <div>
+          <label style="font-size: 0.8rem; color: var(--text-muted);">Fan</label>
+          <input type="number" id="scoreFan" value="3" min="0" style="text-align: center; font-size: 1.2rem;">
+        </div>
+        <span style="font-size: 1.5rem; margin-top: 10px;">-</span>
+        <div>
+          <label style="font-size: 0.8rem; color: var(--text-muted);">SaoTSB</label>
+          <input type="number" id="scoreSaoTSB" value="3" min="0" style="text-align: center; font-size: 1.2rem;">
+        </div>
+      </div>
+      <button id="btnSaveScore">Lưu Tỷ Số & Chuyển Sang Tab Đã Xong</button>
+      <button class="secondary" id="btnCloseEditScore">Hủy</button>
+    </div>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // Ảnh đại diện SVG làm fallback khi đứt mạng
+    const DEFAULT_AVATAR = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="%2338bdf8"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>';
 
     const firebaseConfig = {
       apiKey: "AIzaSyCHACN3BbqHb_G8BvdR5USrFRot97OxYFI",
@@ -62,35 +218,373 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const codeRef = ref(db, 'live_code');
+    const challengesRef = ref(db, 'challenges');
 
-    const codeInput = document.getElementById('code-input');
-    const btnSave = document.getElementById('btn-save');
-    const status = document.getElementById('status');
+    let isAdmin = false;
+    let activeTab = 'gui';
+    let challengesData = {};
+    let selectedChallengeId = null;
+    let verifiedUserData = null;
 
-    // Tải code hiện tại từ Firebase về Editor khi vừa mở
-    get(codeRef).then((snapshot) => {
-      if (snapshot.exists()) {
-        codeInput.value = snapshot.val();
+    // DOM Elements
+    const modalTikTok = document.getElementById('modalTikTok');
+    const btnCloseTikTok = document.getElementById('btnCloseTikTok');
+    const modalCreate = document.getElementById('modalCreate');
+    const btnOpenCreate = document.getElementById('btnOpenCreate');
+    const btnCloseCreate = document.getElementById('btnCloseCreate');
+    const robloxInput = document.getElementById('robloxInput');
+    const btnCheckRoblox = document.getElementById('btnCheckRoblox');
+    const robloxStatus = document.getElementById('robloxStatus');
+    const tiktokInput = document.getElementById('tiktokInput');
+    const btnSubmitChallenge = document.getElementById('btnSubmitChallenge');
+
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const step3 = document.getElementById('step3');
+    const fanAvatar = document.getElementById('fanAvatar');
+    const fanName = document.getElementById('fanName');
+    const saotsbAvatar = document.getElementById('saotsbAvatar');
+
+    const btnAdminModal = document.getElementById('btnAdminModal');
+    const modalAdminPass = document.getElementById('modalAdminPass');
+    const btnCloseAdminPass = document.getElementById('btnCloseAdminPass');
+    const btnLoginAdmin = document.getElementById('btnLoginAdmin');
+    const adminPassInput = document.getElementById('adminPassInput');
+    const adminPassStatus = document.getElementById('adminPassStatus');
+    const adminBanner = document.getElementById('adminBanner');
+    const btnLogoutAdmin = document.getElementById('btnLogoutAdmin');
+
+    const modalEditScore = document.getElementById('modalEditScore');
+    const btnCloseEditScore = document.getElementById('btnCloseEditScore');
+    const btnSaveScore = document.getElementById('btnSaveScore');
+    const scoreFanName = document.getElementById('scoreFanName');
+    const scoreFan = document.getElementById('scoreFan');
+    const scoreSaoTSB = document.getElementById('scoreSaoTSB');
+
+    const cardContainer = document.getElementById('cardContainer');
+    const tabs = document.querySelectorAll('.tab');
+
+    btnCloseTikTok.addEventListener('click', () => modalTikTok.classList.add('hidden'));
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeTab = tab.dataset.tab;
+        renderCards();
+      });
+    });
+
+    btnOpenCreate.addEventListener('click', () => {
+      resetWizardStep();
+      fetchSaoTSBAvatar();
+      modalCreate.classList.remove('hidden');
+    });
+
+    btnCloseCreate.addEventListener('click', () => modalCreate.classList.add('hidden'));
+
+    window.resetWizardStep = function() {
+      step1.classList.remove('hidden');
+      step2.classList.add('hidden');
+      step3.classList.add('hidden');
+      robloxInput.value = '';
+      tiktokInput.value = '';
+      robloxStatus.textContent = '';
+      verifiedUserData = null;
+    };
+
+    window.backToStep2 = function() {
+      step3.classList.add('hidden');
+      step2.classList.remove('hidden');
+    };
+
+    // --- BỘ XỬ LÝ LẤY USER ROBLOX (CORS PROXY PHÒNG VỠ API) ---
+    async function getRobloxUserByName(username) {
+      const targetUrl = 'https://users.roblox.com/v1/usernames/users';
+      const bodyData = { usernames: [username], excludeBannedUsers: true };
+
+      const proxies = [
+        `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
+      ];
+
+      for (let proxy of proxies) {
+        try {
+          const res = await fetch(proxy, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bodyData)
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.data && data.data.length > 0) {
+              return data.data[0];
+            }
+          }
+        } catch (e) {
+          continue;
+        }
       }
-      status.innerText = "Đã tải code mới nhất từ Firebase.";
-    }).catch(err => {
-      status.innerText = "Lỗi tải dữ liệu: " + err.message;
+      return null;
+    }
+
+    // --- LẤY ẢNH AVATAR TRỰC TIẾP TỪ THUMBNAILS API ROBLOX ---
+    async function getRobloxAvatarUrl(userId) {
+      const targetUrl = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`;
+      const proxies = [
+        `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
+      ];
+
+      for (let proxy of proxies) {
+        try {
+          const res = await fetch(proxy);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.data && data.data[0] && data.data[0].imageUrl) {
+              return data.data[0].imageUrl;
+            }
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+      return DEFAULT_AVATAR;
+    }
+
+    async function fetchSaoTSBAvatar() {
+      try {
+        const saoUser = await getRobloxUserByName("Hothiptvn");
+        if (saoUser) {
+          const avatarUrl = await getRobloxAvatarUrl(saoUser.id);
+          saotsbAvatar.src = avatarUrl;
+        } else {
+          saotsbAvatar.src = DEFAULT_AVATAR;
+        }
+      } catch (e) {
+        saotsbAvatar.src = DEFAULT_AVATAR;
+      }
+    }
+
+    // --- XÁC MINH VÀ LẤY ẢNH ROBLOX CỦA FAN ---
+    btnCheckRoblox.addEventListener('click', async () => {
+      const inputVal = robloxInput.value.trim();
+      if (!inputVal) {
+        robloxStatus.className = 'status-msg error';
+        robloxStatus.textContent = 'Vui lòng nhập tên người dùng Roblox!';
+        return;
+      }
+
+      btnCheckRoblox.disabled = true;
+      robloxStatus.className = 'status-msg';
+      robloxStatus.textContent = '⏳ Đang xác minh tên và tải Avatar từ Roblox...';
+
+      try {
+        const userData = await getRobloxUserByName(inputVal);
+
+        if (!userData) {
+          robloxStatus.className = 'status-msg error';
+          robloxStatus.textContent = '✕ Tên Roblox này không tồn tại! Vui lòng kiểm tra lại.';
+          btnCheckRoblox.disabled = false;
+          return;
+        }
+
+        const avatarUrl = await getRobloxAvatarUrl(userData.id);
+
+        verifiedUserData = {
+          id: userData.id,
+          name: userData.name,
+          displayName: userData.displayName || userData.name,
+          avatar: avatarUrl
+        };
+
+        fanAvatar.src = avatarUrl;
+        fanName.textContent = userData.name;
+
+        robloxStatus.textContent = '';
+        step1.classList.add('hidden');
+        step2.classList.remove('hidden');
+
+      } catch (err) {
+        robloxStatus.className = 'status-msg error';
+        robloxStatus.textContent = '✕ Lỗi kết nối API Roblox! Vui lòng thử lại sau.';
+      } finally {
+        btnCheckRoblox.disabled = false;
+      }
     });
 
-    // Sự kiện Lưu code lên Firebase
-    btnSave.addEventListener('click', () => {
-      const code = codeInput.value;
-      status.innerText = "Đang đồng bộ...";
-      
-      set(codeRef, code)
-        .then(() => {
-          status.innerText = "✅ Đã lưu thành công! App trên màn hình sẽ cập nhật ngay lập tức.";
-        })
-        .catch((err) => {
-          status.innerText = "❌ Lỗi khi lưu: " + err.message;
-        });
+    document.getElementById('btnStep2Next').addEventListener('click', () => {
+      step2.classList.add('hidden');
+      step3.classList.remove('hidden');
     });
+
+    // Gửi Thách Đấu
+    btnSubmitChallenge.addEventListener('click', () => {
+      const tiktok = tiktokInput.value.trim();
+      if (!tiktok) {
+        alert("Vui lòng nhập ID TikTok của bạn!");
+        return;
+      }
+      if (!verifiedUserData) {
+        alert("Chưa xác minh tên Roblox!");
+        resetWizardStep();
+        return;
+      }
+
+      const newChallenge = {
+        robloxName: verifiedUserData.name,
+        robloxAvatar: verifiedUserData.avatar,
+        tiktokName: tiktok,
+        status: 'gui',
+        scoreFan: 3,
+        scoreSaoTSB: 3,
+        createdAt: Date.now()
+      };
+
+      push(challengesRef, newChallenge)
+        .then(() => {
+          alert("Gửi lời mời thách đấu thành công!");
+          modalCreate.classList.add('hidden');
+        })
+        .catch(err => alert("Lỗi gửi dữ liệu: " + err.message));
+    });
+
+    // Admin Auth
+    btnAdminModal.addEventListener('click', () => {
+      if (isAdmin) return;
+      adminPassInput.value = '';
+      adminPassStatus.textContent = '';
+      modalAdminPass.classList.remove('hidden');
+    });
+
+    btnCloseAdminPass.addEventListener('click', () => modalAdminPass.classList.add('hidden'));
+
+    btnLoginAdmin.addEventListener('click', () => {
+      if (adminPassInput.value === '0904') {
+        isAdmin = true;
+        modalAdminPass.classList.add('hidden');
+        adminBanner.classList.remove('hidden');
+        renderCards();
+      } else {
+        adminPassStatus.textContent = 'Mật khẩu sai!';
+      }
+    });
+
+    btnLogoutAdmin.addEventListener('click', () => {
+      isAdmin = false;
+      adminBanner.classList.add('hidden');
+      renderCards();
+    });
+
+    // Realtime Sync Data
+    onValue(challengesRef, (snapshot) => {
+      challengesData = snapshot.val() || {};
+      renderCards();
+    });
+
+    // Render Thách Đấu
+    function renderCards() {
+      cardContainer.innerHTML = '';
+      const keys = Object.keys(challengesData);
+      const filteredKeys = keys.filter(key => challengesData[key].status === activeTab);
+
+      if (filteredKeys.length === 0) {
+        cardContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px 0;">Chưa có thách đấu nào ở mục này.</div>`;
+        return;
+      }
+
+      filteredKeys.reverse().forEach(key => {
+        const item = challengesData[key];
+        const card = document.createElement('div');
+        card.className = 'card';
+        const avatar = item.robloxAvatar || DEFAULT_AVATAR;
+
+        let html = `
+          <div class="card-thumb-wrapper">
+            <img src="${avatar}" class="card-thumb" alt="Avatar" referrerpolicy="no-referrer">
+          </div>
+        `;
+        html += `<div class="card-content">`;
+
+        if (item.status === 'gui') {
+          html += `
+            <h3><b>${escapeHtml(item.robloxName)}</b> đang gửi thách đấu với SaoTSB</h3>
+            <div class="score">3 - 3</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 3px;">TikTok: @${escapeHtml(item.tiktokName)}</div>
+            <div class="card-actions">
+              ${isAdmin ? `<button onclick="approveChallenge('${key}')">Duyệt Thách Đấu</button>` : ''}
+              <button class="danger" onclick="deleteChallenge('${key}')">Xóa / Hủy Lời Mời</button>
+            </div>
+          `;
+        } else if (item.status === 'duyet') {
+          html += `
+            <h3><b>${escapeHtml(item.robloxName)}</b> đã được SaoTSB duyệt, vui lòng trò chuyện tiktok</h3>
+            <div class="score">3 - 3</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 3px;">Trận chưa bắt đầu (tỷ số mặc định 3 điểm) | TikTok: @${escapeHtml(item.tiktokName)}</div>
+            <div class="card-actions">
+              ${isAdmin ? `
+                <button class="warning" onclick="unapproveChallenge('${key}')">Hủy Duyệt</button>
+                <button class="danger" onclick="openScoreModal('${key}')">Kết Thúc & Chỉnh Tỷ Số</button>
+              ` : ''}
+              <button class="secondary" onclick="deleteChallenge('${key}')">Xóa</button>
+            </div>
+          `;
+        } else if (item.status === 'ketthuc') {
+          html += `
+            <h3><b>${escapeHtml(item.robloxName)}</b> đã pvp với SaoTSB</h3>
+            <div class="score">Tỷ số là: ${item.scoreFan} - ${item.scoreSaoTSB}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 3px;">(Bên trái: ${escapeHtml(item.robloxName)} | Bên phải: SaoTSB)</div>
+            <div class="card-actions">
+              ${isAdmin ? `<button class="danger" onclick="deleteChallenge('${key}')">Xóa Kết Quả</button>` : ''}
+            </div>
+          `;
+        }
+
+        html += `</div>`;
+        card.innerHTML = html;
+        cardContainer.appendChild(card);
+      });
+    }
+
+    // Chức năng Admin & User
+    window.approveChallenge = function(id) {
+      update(ref(db, `challenges/${id}`), { status: 'duyet' });
+    };
+
+    window.unapproveChallenge = function(id) {
+      if(confirm("Bạn có muốn HỦY DUYỆT và chuyển thách đấu này trở lại tab Đang Gửi không?")) {
+        update(ref(db, `challenges/${id}`), { status: 'gui' });
+      }
+    };
+
+    window.deleteChallenge = function(id) {
+      if(confirm("Xác nhận XÓA / HỦY thách đấu này?")) {
+        remove(ref(db, `challenges/${id}`));
+      }
+    };
+
+    window.openScoreModal = function(id) {
+      selectedChallengeId = id;
+      scoreFanName.textContent = challengesData[id].robloxName;
+      scoreFan.value = 3;
+      scoreSaoTSB.value = 3;
+      modalEditScore.classList.remove('hidden');
+    };
+
+    btnCloseEditScore.addEventListener('click', () => modalEditScore.classList.add('hidden'));
+
+    btnSaveScore.addEventListener('click', () => {
+      if (!selectedChallengeId) return;
+      update(ref(db, `challenges/${selectedChallengeId}`), {
+        status: 'ketthuc',
+        scoreFan: parseInt(scoreFan.value) || 0,
+        scoreSaoTSB: parseInt(scoreSaoTSB.value) || 0
+      }).then(() => modalEditScore.classList.add('hidden'));
+    });
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
   </script>
 </body>
 </html>
