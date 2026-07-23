@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Chatbot Ans</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --danger: #ef4444;
+      --success: #22c55e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+    body, html { width: 100%; height: 100%; background: var(--bg); color: var(--text); overflow: hidden; }
+    
+    #name-screen, #admin-dashboard, #chat-screen {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: none; flex-direction: column; background: var(--bg);
+    }
+    .active-screen { display: flex !important; }
+
+    .center-box {
+      margin: auto; width: 90%; max-width: 400px; background: var(--panel);
+      padding: 24px; border-radius: 16px; border: 1px solid var(--border);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center;
+    }
+    .center-box h2 { color: var(--accent); margin-bottom: 8px; font-size: 1.5rem; }
+    .center-box p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; }
+    
+    input, select {
+      width: 100%; padding: 12px 16px; background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); border-radius: 8px; font-size: 1rem; outline: none; margin-bottom: 15px;
+    }
+    input:focus, select:focus { border-color: var(--accent); }
+
+    .btn {
+      width: 100%; padding: 12px; background: var(--accent); color: #0f172a; border: none;
+      font-weight: 700; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: 0.2s;
+    }
+    .btn:hover { background: var(--accent-hover); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-secondary { background: var(--panel); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--border); }
+
+    /* Giao diện Chat Khách */
+    header {
+      padding: 12px 16px; background: var(--panel); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; font-weight: 600;
+    }
+    .header-actions { display: flex; gap: 8px; align-items: center; }
+    .typing-status { font-size: 0.75rem; color: var(--success); font-weight: 400; font-style: italic; }
+
+    .chat-messages {
+      flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
+    }
+    .message-container { display: flex; flex-direction: column; max-width: 75%; }
+    .message-container.user { align-self: flex-end; align-items: flex-end; }
+    .message-container.bot { align-self: flex-start; align-items: flex-start; }
+
+    .message {
+      padding: 10px 14px; border-radius: 12px; font-size: 0.95rem; line-height: 1.4; word-break: break-word; width: 100%;
+    }
+    .message.user { background: var(--accent); color: #0f172a; border-bottom-right-radius: 2px; }
+    .message.bot { background: var(--panel); color: var(--text); border-bottom-left-radius: 2px; border: 1px solid var(--border); }
+    
+    .tts-btn {
+      background: transparent; border: none; color: var(--text-muted); font-size: 0.75rem;
+      cursor: pointer; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px;
+    }
+    .tts-btn:hover { color: var(--accent); }
+
+    .chat-input-bar {
+      padding: 12px; background: var(--panel); border-top: 1px solid var(--border);
+      display: flex; gap: 8px; align-items: center;
+    }
+    .chat-input-bar input { margin-bottom: 0; flex: 1; }
+    .icon-btn {
+      background: var(--bg); border: 1px solid var(--border); color: var(--text);
+      width: 44px; height: 44px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 1.2rem; flex-shrink: 0; transition: 0.2s;
+    }
+    .icon-btn:hover { background: var(--border); }
+    .icon-btn.recording { background: var(--danger); color: #fff; border-color: var(--danger); animation: pulse 1s infinite; }
+
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+    /* Dashboard Admin */
+    .admin-container { padding: 16px; display: flex; flex-direction: column; height: 100%; gap: 12px; }
+    .admin-layout { display: flex; gap: 12px; flex: 1; overflow: hidden; }
+    .client-sidebar { width: 280px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .client-item {
+      padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+      cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+    }
+    .client-item:hover, .client-item.selected { border-color: var(--accent); background: #162032; }
+
+    .admin-chat-area { flex: 1; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
+    .admin-messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+    .admin-input-bar { padding: 12px; border-top: 1px solid var(--border); display: flex; gap: 8px; background: var(--bg); }
+    .admin-input-bar input { margin-bottom: 0; flex: 1; }
+  </style>
+</head>
+<body>
+
+  <!-- 1. MÀN HÌNH NHẬP TÊN KHÁCH -->
+  <div id="name-screen" class="active-screen">
+    <div class="center-box">
+      <h2>Chatbot Ans</h2>
+      <p>Vui lòng nhập tên của bạn để bắt đầu</p>
+      <input type="text" id="username-input" placeholder="Nhập tên của bạn..." autocomplete="off">
+      <button class="btn" id="start-chat-btn">Vào Trò Chuyện</button>
+    </div>
+  </div>
+
+  <!-- 2. MÀN HÌNH CHAT CHÍNH -->
+  <div id="chat-screen">
+    <header>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span>🤖 Chatbot Ans</span>
+        <span id="typing-indicator" class="typing-status" style="display:none;">(Đang soạn tin...)</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-secondary" id="change-name-btn" style="padding:6px 12px; font-size:0.8rem; width:auto;">Đổi Tên</button>
+      </div>
+    </header>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input-bar">
+      <button class="icon-btn" id="mic-btn" title="Ghi âm giọng nói">🎤</button>
+      <input type="text" id="chat-input" placeholder="Nhắn tin hoặc gõ /0904..." autocomplete="off">
+      <button class="icon-btn" id="send-btn" style="background: var(--accent); color: #0f172a; border: none;">➤</button>
+    </div>
+  </div>
+
+  <!-- 3. MÀN HÌNH ADMIN (GIẢ LẬP AI) -->
+  <div id="admin-dashboard">
+    <div class="admin-container">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="color: var(--accent); font-size: 1.2rem;">⚡ Bảng Điều Khiển AI (Admin)</h2>
+        <button class="btn btn-secondary" id="exit-admin-btn" style="width: auto; padding: 6px 14px; font-size: 0.85rem;">Thoát Admin</button>
+      </div>
+      
+      <div class="admin-layout">
+        <!-- Danh sách khách -->
+        <div class="client-sidebar" id="client-sidebar">
+          <div style="color: var(--text-muted); font-size: 0.85rem; text-align:center;">Danh sách khách đang online</div>
+        </div>
+
+        <!-- Khung chat với khách được chọn -->
+        <div class="admin-chat-area" id="admin-chat-area" style="display:none;">
+          <div style="padding: 10px 14px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <div id="admin-room-title" style="font-weight:600; color: var(--accent);">Đang chat với: ...</div>
+            <button class="btn btn-danger" id="delete-client-btn" style="width: auto; padding: 5px 10px; font-size: 0.8rem;">Xóa Khách Này</button>
+          </div>
+          <div class="admin-messages" id="admin-messages"></div>
+          <div id="client-typing-status" style="font-size:0.75rem; color:var(--success); padding: 0 12px; height: 16px;"></div>
+          <div class="admin-input-bar">
+            <input type="text" id="admin-input" placeholder="Đóng vai AI trả lời khách..." autocomplete="off">
+            <button class="btn" id="admin-send-btn" style="width: 90px;">Gửi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT XỬ LÝ -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCHACN3BbqHb_G8BvdR5USrFRot97OxYFI",
+      authDomain: "html-fae6a.firebaseapp.com",
+      databaseURL: "https://html-fae6a-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "html-fae6a",
+      storageBucket: "html-fae6a.firebasestorage.app",
+      messagingSenderId: "355159856756",
+      appId: "1:355159856756:web:d427d5cdb986bc04812321",
+      measurementId: "G-GN9WM6EKYX"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // DOM Elements
+    const nameScreen = document.getElementById('name-screen');
+    const chatScreen = document.getElementById('chat-screen');
+    const adminDashboard = document.getElementById('admin-dashboard');
+    
+    const usernameInput = document.getElementById('username-input');
+    const startChatBtn = document.getElementById('start-chat-btn');
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    const micBtn = document.getElementById('mic-btn');
+    const chatMessages = document.getElementById('chat-messages');
+    const typingIndicator = document.getElementById('typing-indicator');
+    const changeNameBtn = document.getElementById('change-name-btn');
+
+    const clientSidebar = document.getElementById('client-sidebar');
+    const adminChatArea = document.getElementById('admin-chat-area');
+    const adminMessages = document.getElementById('admin-messages');
+    const adminInput = document.getElementById('admin-input');
+    const adminSendBtn = document.getElementById('admin-send-btn');
+    const adminRoomTitle = document.getElementById('admin-room-title');
+    const deleteClientBtn = document.getElementById('delete-client-btn');
+    const clientTypingStatus = document.getElementById('client-typing-status');
+    const exitAdminBtn = document.getElementById('exit-admin-btn');
+
+    let currentUser = localStorage.getItem('chat_ans_user') || null;
+    let currentRoomId = localStorage.getItem('chat_ans_room') || null;
+    let selectedClientRoom = null;
+    let typingTimeout = null;
+    let isAiSpeaking = false; // Biến kiểm soát trạng thái AI đang đọc
+
+    // Xóa session sau 6 tiếng hoặc nếu phòng bị xóa từ phía AI
+    function checkSession() {
+      if (currentRoomId) {
+        onValue(ref(db, `rooms/${currentRoomId}`), (snapshot) => {
+          if (!snapshot.exists()) {
+            localStorage.clear();
+            location.reload();
+          }
+        }, { onlyOnce: true });
+      }
+    }
+    checkSession();
+
+    if (currentUser && currentRoomId) {
+      nameScreen.classList.remove('active-screen');
+      chatScreen.classList.add('active-screen');
+      initChatSession(currentRoomId);
+    }
+
+    // Đăng ký / Đổi tên
+    startChatBtn.addEventListener('click', () => {
+      const name = usernameInput.value.trim();
+      if (!name) return alert('Vui lòng nhập tên!');
+      
+      currentUser = name;
+      currentRoomId = 'room_' + Date.now() + "_" + Math.floor(Math.random() * 1000);
+      
+      localStorage.setItem('chat_ans_user', currentUser);
+      localStorage.setItem('chat_ans_room', currentRoomId);
+
+      set(ref(db, `rooms/${currentRoomId}`), {
+        username: currentUser,
+        createdAt: Date.now()
+      });
+
+      nameScreen.classList.remove('active-screen');
+      chatScreen.classList.add('active-screen');
+      initChatSession(currentRoomId);
+    });
+
+    changeNameBtn.addEventListener('click', () => {
+      if (currentRoomId) remove(ref(db, `rooms/${currentRoomId}`));
+      localStorage.clear();
+      location.reload();
+    });
+
+    // Nhập lệnh /0904 vào Admin
+    chatInput.addEventListener('input', () => {
+      if (chatInput.value.trim() === '/0904') {
+        chatScreen.classList.remove('active-screen');
+        adminDashboard.classList.add('active-screen');
+        chatInput.value = '';
+        initAdminDashboard();
+      }
+
+      if (currentRoomId) {
+        update(ref(db, `rooms/${currentRoomId}`), { clientTyping: true });
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+          update(ref(db, `rooms/${currentRoomId}`), { clientTyping: false });
+        }, 1500);
+      }
+    });
+
+    exitAdminBtn.addEventListener('click', () => {
+      adminDashboard.classList.remove('active-screen');
+      chatScreen.classList.add('active-screen');
+    });
+
+    // --- GHI ÂM GIỌNG NÓI (Fix chuẩn Web Speech API) ---
+    let recognition = null;
+    try {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'vi-VN';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onresult = (event) => {
+          const text = event.results[0][0].transcript;
+          chatInput.value = text;
+          micBtn.classList.remove('recording');
+        };
+        recognition.onerror = () => micBtn.classList.remove('recording');
+        recognition.onend = () => micBtn.classList.remove('recording');
+      }
+    } catch(e) { console.log(e); }
+
+    micBtn.addEventListener('click', () => {
+      if (!recognition) return alert('Trình duyệt không hỗ trợ ghi âm!');
+      if (micBtn.classList.contains('recording')) {
+        recognition.stop();
+        micBtn.classList.remove('recording');
+      } else {
+        try {
+          recognition.start();
+          micBtn.classList.add('recording');
+        } catch(err) { console.log(err); }
+      }
+    });
+
+    // --- TEXT-TO-SPEECH (Đọc tin nhắn của AI) ---
+    function speakText(text) {
+      if (!('speechSynthesis' in window)) return alert('Trình duyệt không hỗ trợ đọc văn bản!');
+      window.speechSynthesis.cancel(); // Dừng các tiến trình đọc trước đó
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'vi-VN';
+      
+      isAiSpeaking = true;
+      chatInput.disabled = true;
+      sendBtn.style.opacity = 0.5;
+      chatInput.placeholder = "AI đang đọc tin nhắn, vui lòng đợi...";
+
+      utterance.onend = () => {
+        isAiSpeaking = false;
+        chatInput.disabled = false;
+        sendBtn.style.opacity = 1;
+        chatInput.placeholder = "Nhắn tin hoặc gõ /0904...";
+      };
+
+      utterance.onerror = () => {
+        isAiSpeaking = false;
+        chatInput.disabled = false;
+        sendBtn.style.opacity = 1;
+        chatInput.placeholder = "Nhắn tin hoặc gõ /0904...";
+      };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Gửi tin nhắn Khách
+    function sendClientMessage() {
+      if (isAiSpeaking) {
+        alert('Vui lòng đợi AI đọc xong tin nhắn trước khi gửi tiếp!');
+        return;
+      }
+      const text = chatInput.value.trim();
+      if (!text || !currentRoomId) return;
+
+      const newMsgKey = 'msg_' + Date.now();
+      set(ref(db, `rooms/${currentRoomId}/messages/${newMsgKey}`), {
+        sender: 'user',
+        text: text,
+        timestamp: Date.now()
+      });
+
+      chatInput.value = '';
+      update(ref(db, `rooms/${currentRoomId}`), { clientTyping: false });
+    }
+
+    sendBtn.addEventListener('click', sendClientMessage);
+    chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendClientMessage(); });
+
+    // Lắng nghe khung chat Khách
+    function initChatSession(roomId) {
+      onValue(ref(db, `rooms/${roomId}/messages`), (snapshot) => {
+        chatMessages.innerHTML = '';
+        const data = snapshot.val();
+        if (data) {
+          Object.values(data).forEach(msg => {
+            const container = document.createElement('div');
+            container.className = `message-container ${msg.sender}`;
+            
+            const div = document.createElement('div');
+            div.className = `message ${msg.sender}`;
+            div.textContent = msg.text;
+            container.appendChild(div);
+
+            // Nếu là tin nhắn của bot thì có nút nghe đọc
+            if (msg.sender === 'bot') {
+              const ttsBtn = document.createElement('button');
+              ttsBtn.className = 'tts-btn';
+              ttsBtn.innerHTML = '🔊 Đọc tin nhắn';
+              ttsBtn.onclick = () => speakText(msg.text);
+              container.appendChild(ttsBtn);
+            }
+
+            chatMessages.appendChild(container);
+          });
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+      });
+
+      onValue(ref(db, `rooms/${roomId}/aiTyping`), (snapshot) => {
+        typingIndicator.style.display = snapshot.val() ? 'inline' : 'none';
+      });
+    }
+
+    // --- PHẦN ADMIN (GIẢ LẬP AI) ---
+    function initAdminDashboard() {
+      onValue(ref(db, 'rooms'), (snapshot) => {
+        clientSidebar.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; text-align:center;">Danh sách khách</div>';
+        const rooms = snapshot.val();
+        
+        if (!rooms) {
+          adminChatArea.style.display = 'none';
+          return;
+        }
+
+        Object.entries(rooms).forEach(([roomId, roomData]) => {
+          const div = document.createElement('div');
+          div.className = `client-item ${selectedClientRoom === roomId ? 'selected' : ''}`;
+          div.innerHTML = `<span>👤 <b>${roomData.username}</b></span>`;
+          
+          div.addEventListener('click', () => {
+            selectedClientRoom = roomId;
+            document.querySelectorAll('.client-item').forEach(el => el.classList.remove('selected'));
+            div.classList.add('selected');
+            adminChatArea.style.display = 'flex';
+            adminRoomTitle.textContent = `Đang chat với: ${roomData.username}`;
+            listenAdminChat(roomId);
+          });
+          clientSidebar.appendChild(div);
+        });
+      });
+    }
+
+    function listenAdminChat(roomId) {
+      // Lịch sử tin nhắn bên Admin
+      onValue(ref(db, `rooms/${roomId}/messages`), (snapshot) => {
+        adminMessages.innerHTML = '';
+        const data = snapshot.val();
+        if (data) {
+          Object.values(data).forEach(msg => {
+            const div = document.createElement('div');
+            div.className = `message ${msg.sender}`;
+            div.style.alignSelf = msg.sender === 'user' ? 'flex-start' : 'flex-end';
+            div.style.background = msg.sender === 'user' ? 'var(--panel)' : 'var(--accent)';
+            div.style.color = msg.sender === 'user' ? 'var(--text)' : '#0f172a';
+            div.textContent = `${msg.sender === 'user' ? 'Khách' : 'AI'}: ${msg.text}`;
+            adminMessages.appendChild(div);
+          });
+          adminMessages.scrollTop = adminMessages.scrollHeight;
+        }
+      });
+
+      // Trạng thái khách đang gõ
+      onValue(ref(db, `rooms/${roomId}/clientTyping`), (snapshot) => {
+        clientTypingStatus.textContent = snapshot.val() ? "Khách đang soạn tin..." : "";
+      });
+    }
+
+    // Gửi tin nhắn từ phía Admin
+    function sendAdminMessage() {
+      const text = adminInput.value.trim();
+      if (!text || !selectedClientRoom) return;
+
+      const newMsgKey = 'msg_' + Date.now();
+      set(ref(db, `rooms/${selectedClientRoom}/messages/${newMsgKey}`), {
+        sender: 'bot',
+        text: text,
+        timestamp: Date.now()
+      });
+
+      adminInput.value = '';
+      update(ref(db, `rooms/${selectedClientRoom}`), { aiTyping: false });
+    }
+
+    adminSendBtn.addEventListener('click', sendAdminMessage);
+    adminInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendAdminMessage(); });
+
+    adminInput.addEventListener('input', () => {
+      if (selectedClientRoom) {
+        update(ref(db, `rooms/${selectedClientRoom}`), { aiTyping: adminInput.value.length > 0 });
+      }
+    });
+
+    // AI xóa tên / xóa phòng của khách
+    deleteClientBtn.addEventListener('click', () => {
+      if (!selectedClientRoom) return;
+      if (confirm('Bạn có chắc muốn xóa vĩnh viễn khách này khỏi hệ thống?')) {
+        remove(ref(db, `rooms/${selectedClientRoom}`));
+        selectedClientRoom = null;
+        adminChatArea.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
