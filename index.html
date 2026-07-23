@@ -2,348 +2,53 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SaoTSB - PVP</title>
-
-  <!-- 1. LIÊN KẾT MANIFEST DÀNH CHO ANDROID -->
-  <link rel="manifest" href="manifest.json">
-
-  <!-- 2. CẤU HÌNH DÀNH CHO IOS SAFARI -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="SaoTSB - PVP">
-
   <style>
-    :root {
-      --bg-color: #0b0f19;
-      --card-bg: #151d2a;
-      --card-hover: #1c2638;
-      --accent: #38bdf8;
-      --accent-hover: #0284c7;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --border: #26334d;
-      --tiktok: #ff0050;
-      --tiktok-hover: #e00047;
-    }
-
-    * { 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0; 
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      touch-action: manipulation;
-    }
-
-    body, html { 
-      width: 100%; 
-      height: 100%; 
-      background-color: var(--bg-color); 
-      color: var(--text);
-      overflow-x: hidden;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes pulseGlow {
-      0% { box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); }
-      50% { box-shadow: 0 0 15px rgba(56, 189, 248, 0.6); }
-      100% { box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); }
-    }
-
-    /* Màn hình hướng dẫn cài đặt PWA */
-    #install-guide {
-      display: none;
-      padding: 20px 15px;
-      min-height: 100vh;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      animation: fadeIn 0.3s ease-out;
-    }
-
-    .card {
-      background: var(--card-bg);
-      padding: 24px 20px;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-      border: 1px solid var(--border);
-      max-width: 440px;
-      width: 100%;
-      text-align: center;
-      animation: pulseGlow 3s infinite;
-    }
-
-    .brand-header {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    .logo-img {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      border: 2px solid var(--accent);
-      object-fit: cover;
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
-    }
-
-    h2 { 
-      font-size: 1.35rem; 
-      color: var(--accent); 
-      font-weight: 800; 
-      letter-spacing: 0.5px;
-    }
-
-    p.sub { 
-      font-size: 0.88rem; 
-      color: var(--text-muted); 
-      margin-bottom: 16px; 
-      line-height: 1.4; 
-    }
-
-    /* Nút TikTok liên kết */
-    .btn-tiktok {
-      background: var(--tiktok);
-      color: #fff;
-      border: none;
-      padding: 9px 16px;
-      border-radius: 20px;
-      font-weight: 700;
-      font-size: 0.85rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.2s;
-      text-decoration: none;
-      margin-bottom: 20px;
-      width: 100%;
-    }
-
-    .btn-tiktok:hover {
-      background: var(--tiktok-hover);
-      transform: translateY(-1px);
-    }
-
-    /* Thanh Chuyển Tab iOS / Android */
-    .tab-header {
-      display: flex;
-      background: var(--bg-color);
-      padding: 4px;
-      border-radius: 10px;
-      margin-bottom: 18px;
-      border: 1px solid var(--border);
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 9px;
-      border: none;
-      background: transparent;
-      font-weight: 700;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .tab-btn.active {
-      background: var(--card-hover);
-      color: var(--accent);
-      border: 1px solid var(--border);
-    }
-
-    /* Nội dung các Tab Hướng dẫn */
-    .tab-content { display: none; text-align: left; }
-    .tab-content.active { display: block; animation: fadeIn 0.2s ease-out; }
-
-    .step-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 12px;
-      font-size: 0.88rem;
-      color: #cbd5e1;
-      line-height: 1.5;
-      background: var(--bg-color);
-      padding: 10px 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-    }
-
-    .step-num {
-      background: var(--accent);
-      color: #000;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.78rem;
-      font-weight: 800;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .highlight {
-      color: var(--accent);
-      font-weight: 700;
-    }
-
-    /* Container chứa App chạy từ Firebase */
-    #app-container { 
-      width: 100%; 
-      height: 100%; 
-      display: none; 
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body, html { width: 100%; height: 100%; background-color: #0b0f19; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+    #app-container { width: 100%; height: 100%; }
   </style>
 </head>
 <body>
 
-  <!-- MÀN HÌNH HƯỚNG DẪN PWA -->
-  <div id="install-guide">
-    <div class="card">
-      <div class="brand-header">
-        <img src="https://i.ibb.co/sdskB64g/image.jpg" alt="SaoTSB Logo" class="logo-img">
-        <h2>SaoTSB - PVP</h2>
-      </div>
-
-      <p class="sub">Thêm trang này ra màn hình chính để trải nghiệm giao diện PvP mượt mà không có thanh địa chỉ.</p>
-
-      <!-- Nút TikTok SaoTSB -->
-      <a href="https://www.tiktok.com/@saotsb210?_r=1&_t=ZS-98Gx7uXesD7" target="_blank" class="btn-tiktok">
-        🎵 Follow TikTok <b>@saotsb210</b>
-      </a>
-
-      <!-- Thanh chọn Hệ điều hành -->
-      <div class="tab-header">
-        <button class="tab-btn" id="btn-android" onclick="switchTab('android')">🤖 Android</button>
-        <button class="tab-btn" id="btn-ios" onclick="switchTab('ios')">🍎 iOS (Safari)</button>
-      </div>
-
-      <!-- Hướng dẫn cho Android -->
-      <div id="tab-android" class="tab-content">
-        <div class="step-item">
-          <div class="step-num">1</div>
-          <div>Ấn vào biểu tượng <span class="highlight">3 chấm (⋮)</span> ở góc trên bên phải Chrome.</div>
-        </div>
-        <div class="step-item">
-          <div class="step-num">2</div>
-          <div>Chọn <span class="highlight">Cài đặt ứng dụng</span> (hoặc <i>Thêm vào Màn hình chính</i>).</div>
-        </div>
-        <div class="step-item">
-          <div class="step-num">3</div>
-          <div>Xác nhận <strong>Thêm</strong>. Mở app trực tiếp từ biểu tượng ngoài màn hình chính.</div>
-        </div>
-      </div>
-
-      <!-- Hướng dẫn cho iOS -->
-      <div id="tab-ios" class="tab-content">
-        <div class="step-item">
-          <div class="step-num">1</div>
-          <div>Mở bằng Safari và ấn nút <span class="highlight">Chia sẻ ⎋</span> ở thanh công cụ dưới.</div>
-        </div>
-        <div class="step-item">
-          <div class="step-num">2</div>
-          <div>Kéo xuống chọn <span class="highlight">➕ Thêm vào Màn hình chính</span> (Add to Home Screen).</div>
-        </div>
-        <div class="step-item">
-          <div class="step-num">3</div>
-          <div>Ấn <strong>Thêm</strong> ở góc trên bên phải để hoàn tất.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- CONTAINER CHẠY APP THỰC BẰNG FIREBASE -->
+  <!-- CONTAINER CHẠY CODE REALTIME TỪ ED.HTML -->
   <div id="app-container"></div>
 
-  <!-- SCRIPT XỬ LÝ CHUYỂN TAB & FIREBASE REALTIME -->
+  <!-- FIREBASE REALTIME LISTENER -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // 1. Hàm chuyển đổi Tab iOS / Android
-    window.switchTab = function(os) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-      document.getElementById(`btn-${os}`).classList.add('active');
-      document.getElementById(`tab-${os}`).classList.add('active');
+    const firebaseConfig = {
+      apiKey: "AIzaSyCHACN3BbqHb_G8BvdR5USrFRot97OxYFI",
+      authDomain: "html-fae6a.firebaseapp.com",
+      databaseURL: "https://html-fae6a-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "html-fae6a",
+      storageBucket: "html-fae6a.firebasestorage.app",
+      messagingSenderId: "355159856756",
+      appId: "1:355159856756:web:d427d5cdb986bc04812321",
+      measurementId: "G-GN9WM6EKYX"
     };
 
-    // Tự động nhận diện HĐH ban đầu để chọn Tab mặc định
-    const userAgent = navigator.userAgent.toLowerCase();
-    if (/iphone|ipad|ipod/.test(userAgent)) {
-      switchTab('ios');
-    } else {
-      switchTab('android');
-    }
-
-    // 2. Kiểm tra chế độ Standalone (App Màn hình chính)
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-
-    const installGuide = document.getElementById('install-guide');
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const codeRef = ref(db, 'live_code');
     const appContainer = document.getElementById('app-container');
 
-    if (!isStandalone) {
-      // Nếu mở trên Web -> Hiện bảng hướng dẫn
-      installGuide.style.display = 'flex';
-    } else {
-      // Nếu mở từ Icon App ngoài màn hình chính -> Ẩn hướng dẫn, hiện App
-      appContainer.style.display = 'block';
+    // Lắng nghe thay đổi Realtime từ ed.html
+    onValue(codeRef, (snapshot) => {
+      const htmlContent = snapshot.val() || "<h3 style='padding:20px; color:#94a3b8; text-align:center;'>Chưa có code nào. Nhập code từ ed.html nhé!</h3>";
+      appContainer.innerHTML = htmlContent;
 
-      // 3. Kết nối Firebase Realtime Data
-      const firebaseConfig = {
-        apiKey: "AIzaSyCHACN3BbqHb_G8BvdR5USrFRot97OxYFI",
-        authDomain: "html-fae6a.firebaseapp.com",
-        databaseURL: "https://html-fae6a-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "html-fae6a",
-        storageBucket: "html-fae6a.firebasestorage.app",
-        messagingSenderId: "355159856756",
-        appId: "1:355159856756:web:d427d5cdb986bc04812321",
-        measurementId: "G-GN9WM6EKYX"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const db = getDatabase(app);
-      const codeRef = ref(db, 'live_code');
-
-      // Lắng nghe biến đổi từ `ed.html`
-      onValue(codeRef, (snapshot) => {
-        const htmlContent = snapshot.val() || "<h3 style='padding:20px; color:#94a3b8; text-align:center;'>Chưa có code nào. Nhập code từ ed.html nhé!</h3>";
-        appContainer.innerHTML = htmlContent;
-
-        // Cho phép thực thi thẻ <script> bên trong mã HTML nhận về
-        Array.from(appContainer.querySelectorAll("script")).forEach(oldScript => {
-          const newScript = document.createElement("script");
-          Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-          newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-          oldScript.parentNode.replaceChild(newScript, oldScript);
-        });
+      // Kích hoạt lại toàn bộ thẻ <script> có trong code nhận về
+      Array.from(appContainer.querySelectorAll("script")).forEach(oldScript => {
+        const newScript = document.createElement("script");
+        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+        newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+        oldScript.parentNode.replaceChild(newScript, oldScript);
       });
-      if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Service Worker đã kích hoạt thành công!'))
-          .catch(err => console.log('Lỗi Service Worker:', err));
-      });
-      }
-    }
+    });
   </script>
 </body>
 </html>
