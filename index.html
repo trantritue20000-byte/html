@@ -2,112 +2,214 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SaoTSB pvp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SaoTSB - PVP</title>
 
-  <!-- 1. LIÊN KẾT MANIFEST DÀNH CHO ANDROID (CHỐNG MỞ TAB TRÌNH DUYỆT) -->
+  <!-- 1. LIÊN KẾT MANIFEST DÀNH CHO ANDROID -->
   <link rel="manifest" href="manifest.json">
 
   <!-- 2. CẤU HÌNH DÀNH CHO IOS SAFARI -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="SaoTSB pvp">
+  <meta name="apple-mobile-web-app-title" content="SaoTSB - PVP">
 
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body, html { width: 100%; height: 100%; font-family: system-ui, -apple-system, sans-serif; background: #f4f6f8; }
+    :root {
+      --bg-color: #0b0f19;
+      --card-bg: #151d2a;
+      --card-hover: #1c2638;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #26334d;
+      --tiktok: #ff0050;
+      --tiktok-hover: #e00047;
+    }
 
-    /* Màn hình hướng dẫn cài đặt */
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    body, html { 
+      width: 100%; 
+      height: 100%; 
+      background-color: var(--bg-color); 
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); }
+      50% { box-shadow: 0 0 15px rgba(56, 189, 248, 0.6); }
+      100% { box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); }
+    }
+
+    /* Màn hình hướng dẫn cài đặt PWA */
     #install-guide {
       display: none;
-      padding: 20px;
+      padding: 20px 15px;
       min-height: 100vh;
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      animation: fadeIn 0.3s ease-out;
     }
 
     .card {
-      background: #ffffff;
-      padding: 25px 20px;
-      border-radius: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-      max-width: 420px;
+      background: var(--card-bg);
+      padding: 24px 20px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+      border: 1px solid var(--border);
+      max-width: 440px;
       width: 100%;
       text-align: center;
+      animation: pulseGlow 3s infinite;
     }
 
-    .icon { font-size: 42px; margin-bottom: 10px; }
-    h2 { font-size: 20px; color: #222; margin-bottom: 8px; }
-    p.sub { font-size: 14px; color: #666; margin-bottom: 20px; line-height: 1.4; }
+    .brand-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
 
-    /* Thanh Chuyển Tab (iOS / Android) */
+    .logo-img {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      object-fit: cover;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+    }
+
+    h2 { 
+      font-size: 1.35rem; 
+      color: var(--accent); 
+      font-weight: 800; 
+      letter-spacing: 0.5px;
+    }
+
+    p.sub { 
+      font-size: 0.88rem; 
+      color: var(--text-muted); 
+      margin-bottom: 16px; 
+      line-height: 1.4; 
+    }
+
+    /* Nút TikTok liên kết */
+    .btn-tiktok {
+      background: var(--tiktok);
+      color: #fff;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      text-decoration: none;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    .btn-tiktok:hover {
+      background: var(--tiktok-hover);
+      transform: translateY(-1px);
+    }
+
+    /* Thanh Chuyển Tab iOS / Android */
     .tab-header {
       display: flex;
-      background: #eef2f5;
+      background: var(--bg-color);
       padding: 4px;
-      border-radius: 12px;
-      margin-bottom: 20px;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      border: 1px solid var(--border);
     }
 
     .tab-btn {
       flex: 1;
-      padding: 10px;
+      padding: 9px;
       border: none;
       background: transparent;
-      font-weight: 600;
-      font-size: 14px;
-      color: #666;
-      border-radius: 9px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
     .tab-btn.active {
-      background: #ffffff;
-      color: #007aff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      background: var(--card-hover);
+      color: var(--accent);
+      border: 1px solid var(--border);
     }
 
-    /* Nội dung các Tab */
+    /* Nội dung các Tab Hướng dẫn */
     .tab-content { display: none; text-align: left; }
-    .tab-content.active { display: block; }
+    .tab-content.active { display: block; animation: fadeIn 0.2s ease-out; }
 
     .step-item {
       display: flex;
       align-items: flex-start;
       gap: 12px;
-      margin-bottom: 15px;
-      font-size: 14px;
-      color: #333;
+      margin-bottom: 12px;
+      font-size: 0.88rem;
+      color: #cbd5e1;
       line-height: 1.5;
+      background: var(--bg-color);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
     }
 
     .step-num {
-      background: #007aff;
-      color: white;
+      background: var(--accent);
+      color: #000;
       width: 22px;
       height: 22px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
-      font-weight: bold;
+      font-size: 0.78rem;
+      font-weight: 800;
       flex-shrink: 0;
-      margin-top: 2px;
+      margin-top: 1px;
     }
 
     .highlight {
-      background: #e8f2ff;
-      color: #007aff;
-      padding: 2px 6px;
-      border-radius: 6px;
-      font-weight: 600;
+      color: var(--accent);
+      font-weight: 700;
     }
 
     /* Container chứa App chạy từ Firebase */
-    #app-container { width: 100%; height: 100%; display: none; }
+    #app-container { 
+      width: 100%; 
+      height: 100%; 
+      display: none; 
+    }
   </style>
 </head>
 <body>
@@ -115,9 +217,17 @@
   <!-- MÀN HÌNH HƯỚNG DẪN PWA -->
   <div id="install-guide">
     <div class="card">
-      <div class="icon">📱</div>
-      <h2>Cài đặt App vào Màn hình</h2>
-      <p class="sub">Thêm trang này ra màn hình chính để trải nghiệm giao diện full app riêng biệt không có thanh địa chỉ.</p>
+      <div class="brand-header">
+        <img src="https://i.ibb.co/sdskB64g/image.jpg" alt="SaoTSB Logo" class="logo-img">
+        <h2>SaoTSB - PVP</h2>
+      </div>
+
+      <p class="sub">Thêm trang này ra màn hình chính để trải nghiệm giao diện PvP mượt mà không có thanh địa chỉ.</p>
+
+      <!-- Nút TikTok SaoTSB -->
+      <a href="https://www.tiktok.com/@saotsb210?_r=1&_t=ZS-98Gx7uXesD7" target="_blank" class="btn-tiktok">
+        🎵 Follow TikTok <b>@saotsb210</b>
+      </a>
 
       <!-- Thanh chọn Hệ điều hành -->
       <div class="tab-header">
@@ -129,7 +239,7 @@
       <div id="tab-android" class="tab-content">
         <div class="step-item">
           <div class="step-num">1</div>
-          <div>Ấn vào biểu tượng <span class="highlight">3 chấm (⋮)</span> ở góc trên bên phải trình duyệt Chrome.</div>
+          <div>Ấn vào biểu tượng <span class="highlight">3 chấm (⋮)</span> ở góc trên bên phải Chrome.</div>
         </div>
         <div class="step-item">
           <div class="step-num">2</div>
@@ -137,7 +247,7 @@
         </div>
         <div class="step-item">
           <div class="step-num">3</div>
-          <div>Xác nhận <strong>Thêm</strong>. Sau đó mở app trực tiếp từ biểu tượng ngoài màn hình chính.</div>
+          <div>Xác nhận <strong>Thêm</strong>. Mở app trực tiếp từ biểu tượng ngoài màn hình chính.</div>
         </div>
       </div>
 
@@ -145,7 +255,7 @@
       <div id="tab-ios" class="tab-content">
         <div class="step-item">
           <div class="step-num">1</div>
-          <div>Mở bằng trình duyệt Safari và ấn vào nút <span class="highlight">Chia sẻ ⎋</span> ở dưới cùng thanh công cụ.</div>
+          <div>Mở bằng Safari và ấn nút <span class="highlight">Chia sẻ ⎋</span> ở thanh công cụ dưới.</div>
         </div>
         <div class="step-item">
           <div class="step-num">2</div>
@@ -215,7 +325,7 @@
 
       // Lắng nghe biến đổi từ `ed.html`
       onValue(codeRef, (snapshot) => {
-        const htmlContent = snapshot.val() || "<h3 style='padding:20px;'>Chưa có code nào. Nhập code từ ed.html nhé!</h3>";
+        const htmlContent = snapshot.val() || "<h3 style='padding:20px; color:#94a3b8; text-align:center;'>Chưa có code nào. Nhập code từ ed.html nhé!</h3>";
         appContainer.innerHTML = htmlContent;
 
         // Cho phép thực thi thẻ <script> bên trong mã HTML nhận về
