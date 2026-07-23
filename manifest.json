@@ -1,6 +1,6 @@
 {
-  "name": "My Web App",
-  "short_name": "My App",
+  "name": "SaoTSB",
+  "short_name": "SaoTSB pvp",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
